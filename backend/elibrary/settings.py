@@ -15,17 +15,12 @@ import cloudinary
 # Initialize logger
 logger = logging.getLogger(__name__)
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
-# Explicitly load .env from the same directory as settings.py (elibrary/.env)
-load_dotenv(Path(__file__).resolve().parent / '.env')
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-me')
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+
 
 # ALLOWED_HOSTS configuration for production
 RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
@@ -58,6 +53,8 @@ THIRD_PARTY_APPS = [
     'django_filters',
     'cloudinary',
     'cloudinary_storage',
+    'langchain_postgres',
+    'langchain_google_genai',
 ]
 
 LOCAL_APPS = [
@@ -66,6 +63,7 @@ LOCAL_APPS = [
     'analytics',
     'reading',
     'subscriptions',
+    'ai_core',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
