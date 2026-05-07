@@ -5,7 +5,7 @@ from langchain_postgres import PGVector
 
 
 QA_COLLECTION_NAME = "library_docs"
-QA_EMBEDDING_MODEL = "models/text-embedding-004"
+QA_EMBEDDING_MODEL = "models/gemini-embedding-001"
 QA_CHAT_MODEL = "gemini-1.5-flash"
 
 

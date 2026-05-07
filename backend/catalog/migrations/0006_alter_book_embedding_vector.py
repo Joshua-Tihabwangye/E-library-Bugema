@@ -11,7 +11,15 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
+        migrations.RunSQL(
+            sql="CREATE EXTENSION IF NOT EXISTS vector;",
+            reverse_sql="DROP EXTENSION IF EXISTS vector;",
+        ),
+        migrations.RemoveField(
+            model_name='book',
+            name='embedding_vector',
+        ),
+        migrations.AddField(
             model_name='book',
             name='embedding_vector',
             field=pgvector.django.vector.VectorField(blank=True, dimensions=768, null=True),

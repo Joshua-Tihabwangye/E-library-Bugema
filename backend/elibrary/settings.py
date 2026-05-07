@@ -7,6 +7,7 @@ import logging
 from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
 from urllib.parse import urlparse, parse_qsl
 
@@ -18,7 +19,9 @@ logger = logging.getLogger(__name__)
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-me')
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    raise ImproperlyConfigured("SECRET_KEY environment variable is required.")
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
 
@@ -112,11 +115,11 @@ TEMPLATES = [
 ]
 
 # Database Configuration
-# Use environment variable if available, otherwise use the default Neon DB connection
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    'postgresql://neondb_owner:npg_H5wszTpZiW3a@ep-morning-union-ahzk3wvm-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
-)
+DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("NEON_DATABASE_URL")
+if not DATABASE_URL:
+    raise ImproperlyConfigured(
+        "DATABASE_URL or NEON_DATABASE_URL environment variable is required."
+    )
 
 DATABASES = {
     "default": dj_database_url.parse(
@@ -350,23 +353,32 @@ LOGGING = {
     },
 }
 
-# Cloudinary credentials (load from environment or secret manager)
+# Cloudinary credentials (load strictly from environment)
+CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME")
+CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY")
+CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET")
+
+if not (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET):
+    raise ImproperlyConfigured(
+        "CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET "
+        "environment variables are required."
+    )
+
 cloudinary.config(
-    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME', 'e-bugema'),
-    api_key=os.getenv('CLOUDINARY_API_KEY', '784176254118466'),
-    api_secret=os.getenv('CLOUDINARY_API_SECRET', 'wCG7qPZViEo8q1tVJDpi89mM5Us'),
-    secure=True
+    cloud_name=CLOUDINARY_CLOUD_NAME,
+    api_key=CLOUDINARY_API_KEY,
+    api_secret=CLOUDINARY_API_SECRET,
+    secure=True,
 )
 
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME', 'e-bugema'),
-    'API_KEY': os.getenv('CLOUDINARY_API_KEY', '784176254118466'),
-    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET', 'wCG7qPZViEo8q1tVJDpi89mM5Us'),
+    'CLOUD_NAME': CLOUDINARY_CLOUD_NAME,
+    'API_KEY': CLOUDINARY_API_KEY,
+    'API_SECRET': CLOUDINARY_API_SECRET,
     'RESOURCE_TYPE': 'raw',
     'USE_FILENAME': True,
-    'UNIQUE_FILENAME': False, 
+    'UNIQUE_FILENAME': False,
 }
 
 MEDIA_URL = "/media/"
